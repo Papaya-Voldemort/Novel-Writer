@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NovelCraft — Writing Studio for Authors</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg: #fbfbfd;
+      --bg-2:#ffffff;
+      --bg-3:#f0f2f5;
+      --ink:#1a1a1a;
+      --muted:#707785;
+      --line:#e6e8ec;
+      --brand:#5b7cfa;
+      --brand-2:#3b5cff;
+      --danger:#ec5a5a;
+      --success:#2db470;
+      --warn:#ffb020;
+      --shadow: 0 8px 28px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.06);
+      --radius:14px;
+      --ui: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --serif: Georgia, "Times New Roman", Times, serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    [data-theme="dark"]{
+      --bg:#0f1116;
+      --bg-2:#12151c;
+      --bg-3:#1a1f2a;
+      --ink:#e8ecf2;
+      --muted:#97a0b3;
+      --line:#242a35;
+      --brand:#7e97ff;
+      --brand-2:#96a9ff;
+      --shadow: 0 10px 30px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.35);
+    }
+    [data-theme="sepia"]{
+      --bg:#f6f1e6;
+      --bg-2:#f1eadc;
+      --bg-3:#e7decc;
+      --ink:#3a2e22;
+      --muted:#7a6a57;
+      --line:#d8ccb7;
+      --brand:#9b6b44;
+      --brand-2:#7d5536;
+      --shadow: 0 8px 28px rgba(66,47,28,.12),0 2px 8px rgba(66,47,28,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;
+    }
+
+    /* App Shell */
+    .app{
+      height:100%;display:grid;grid-template-rows:auto 1fr auto;
+    }
+    .topbar{
+      height:64px;display:flex;align-items:center;gap:10px;
+      padding:0 14px;background:var(--bg-2);border-bottom:1px solid var(--line);
+      position:relative;z-index:5;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;
+    }
+    .brand-logo{
+      inline-size:28px;block-size:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      display:grid;place-items:center;color:white;font-weight:800;box-shadow:var(--shadow);
+    }
+    .brand-name{font-weight:700;letter-spacing:.2px}
+    .top-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+    .btn{
+      border:1px solid var(--line);background:var(--bg-2);color:var(--ink);
+      padding:9px 12px;border-radius:10px;cursor:pointer;transition:.15s;
+      display:inline-flex;align-items:center;gap:8px;font-weight:600
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+    .btn.primary{background:var(--brand);color:white;border-color:transparent}
+    .btn.ghost{background:transparent}
+    .btn.icon{padding:9px;border-radius:12px;min-width:40px;justify-content:center}
+    .btn.danger{background:var(--danger);border-color:transparent;color:#fff}
+    .btn.success{background:var(--success);border-color:transparent;color:#fff}
+    .seg{
+      display:flex;background:var(--bg-3);border:1px solid var(--line);border-radius:12px;overflow:hidden
+    }
+    .seg .btn{border:none;border-radius:0;background:transparent}
+    .seg .btn.active{background:var(--bg-2)}
+    .tooltip{position:relative}
+    .tooltip[data-title]:hover:after{
+      content:attr(data-title);position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);
+      background:#111;color:#fff;padding:6px 10px;border-radius:8px;white-space:nowrap;font-size:12px;opacity:.95
+    }
+
+    .canvas{
+      display:grid;grid-template-columns:320px 1fr 0px;height:calc(100vh - 64px - 32px);
+    }
+    .sidebar{
+      border-right:1px solid var(--line);background:var(--bg-2);display:flex;flex-direction:column;min-width:260px;transition:.2s;
+    }
+    .sidebar.collapsed{width:0;min-width:0;overflow:hidden;border-right:none}
+    .side-h{
+      padding:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px
+    }
+    .side-h .title{font-weight:700}
+    .proj-meta{padding:12px 14px;border-bottom:1px solid var(--line)}
+    .meta-row{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:4px 0}
+    .progress{height:8px;background:var(--bg-3);border-radius:999px;overflow:hidden}
+    .progress .fill{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:.35s}
+
+    .chapters{padding:10px;overflow:auto}
+    .chapter{
+      border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;margin:8px 0;cursor:pointer;
+      transition:.15s;display:flex;align-items:center;gap:10px
+    }
+    .chapter:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+    .chapter.active{outline:2px solid var(--brand)}
+    .chapter .drag{cursor:grab;opacity:.7}
+    .chapter .name{font-weight:600}
+    .chapter .stats{margin-left:auto;color:var(--muted);font-size:12px}
+    .new-chapter{margin:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--bg-3);border:1px solid var(--line);font-weight:600}
+
+    .editor-wrap{display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+    .ed-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg-2)}
+    .ed-title{
+      flex:1;border:none;background:transparent;font-family:var(--serif);font-weight:700;font-size:22px;color:var(--ink);outline:0
+    }
+    .ed-body{overflow:auto;padding:40px;position:relative}
+    .page{
+      max-width:900px;margin:0 auto;background:var(--bg-2);border:1px solid var(--line);border-radius:18px;min-height:80vh;box-shadow:var(--shadow);
+      padding:48px
+    }
+    .editor{
+      min-height:70vh;outline:none;font-family:var(--serif);font-size:18px;line-height:1.7;letter-spacing:.2px
+    }
+    .editor:empty:before{content:"Start writing your story…";color:var(--muted);font-style:italic}
+    .typewriter .page{scroll-margin-top:40vh}
+    .typewriter .editor{caret-color:var(--brand)}
+    .focus .sidebar, .focus .topbar, .focus .status{display:none}
+    .focus .canvas{grid-template-columns:0 1fr 0}
+    .focus .page{max-width:820px;padding:56px}
+    .right-panel{
+      border-left:1px solid var(--line);background:var(--bg-2);display:none;flex-direction:column;
+    }
+    .right-panel.active{display:flex}
+    .rp-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+    .rp-title{font-weight:700}
+    .rp-body{padding:14px;overflow:auto}
+    .card{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:14px;margin:10px 0}
+
+    .status{
+      height:32px;border-top:1px solid var(--line);background:var(--bg-2);
+      display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:var(--muted);font-size:12px
+    }
+
+    /* Modals */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+    .modal.show{display:flex}
+    .dialog{max-width:720px;width:100%;background:var(--bg-2);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+    .dialog-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .dialog-b{padding:16px;max-height:70vh;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .row{display:flex;gap:10px;align-items:center}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:12px;color:var(--muted)}
+    input[type="text"],input[type="number"],textarea,select{
+      background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit
+    }
+    textarea{min-height:100px;resize:vertical}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+
+    /* Library cards */
+    .book{
+      border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer
+    }
+    .book:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+    .book-head{display:flex;gap:10px;align-items:center}
+    .cover{
+      width:40px;height:52px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:var(--shadow);flex:0 0 40px
+    }
+    .book-title{font-weight:700}
+    .book-meta{color:var(--muted);font-size:12px}
+    .book-actions{display:flex;gap:8px;margin-top:6px}
+
+    /* Export print */
+    @media print{
+      body{background:#fff}
+      .topbar,.sidebar,.right-panel,.status,.modal{display:none !important}
+      .canvas{grid-template-columns:1fr}
+      .page{border:none;box-shadow:none;padding:0;max-width:100%}
+      .editor{font-size:12pt;line-height:1.5}
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}
+    ::-webkit-scrollbar-thumb:hover{background:#c9cdd3}
+    [data-theme="dark"] ::-webkit-scrollbar-thumb{background:#2a3140}
+    [data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#364059}
+
+    @media (max-width: 1000px){
+      .canvas{grid-template-columns:0 1fr 0}
+      .sidebar{position:fixed;left:12px;top:76px;bottom:44px;width:320px;z-index:10;border-radius:16px;box-shadow:var(--shadow)}
+      .sidebar.backdrop::before{
+        content:"";position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:-1
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app" id="app">
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-logo">N</div>
+        <div class="brand-name">NovelCraft</div>
+      </div>
+
+      <div class="seg" role="group" aria-label="Left controls">
+        <button class="btn icon tooltip" id="appMenuBtn" data-title="App menu (⌘/Ctrl+M)">☰</button>
+        <button class="btn icon tooltip" id="toggleSidebarBtn" data-title="Toggle chapters (⌘/Ctrl+\\)">📚</button>
+      </div>
+
+      <div class="seg" style="margin-left:10px">
+        <button class="btn" id="saveBtn">💾 Save</button>
+        <button class="btn" id="exportBtn">📤 Export</button>
+        <button class="btn" id="backupBtn">🧰 Backup</button>
+      </div>
+
+      <div class="seg" style="margin-left:10px">
+        <button class="btn" id="boldBtn"><b>B</b></button>
+        <button class="btn" id="italicBtn"><i>I</i></button>
+        <button class="btn" id="underlineBtn"><u>U</u></button>
+        <button class="btn" id="findBtn">🔎 Find</button>
+      </div>
+
+      <div class="seg" style="margin-left:10px">
+        <select id="themeSelect" class="btn">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="sepia">Sepia</option>
+        </select>
+        <button class="btn" id="focusBtn">🎯 Focus</button>
+        <button class="btn" id="fullscreenBtn">⛶ Full</button>
+        <button class="btn" id="typewriterBtn">⌨ Typewriter</button>
+      </div>
+
+      <div class="top-actions">
+        <button class="btn primary" id="charactersBtn">👥 Characters</button>
+        <button class="btn" id="notesBtn">📝 Notes</button>
+        <button class="btn success" id="sprintBtn">⚡ Sprint</button>
+      </div>
+    </div>
+
+    <div class="canvas">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="side-h">
+          <div class="title" id="bookTitleSide">Untitled Book</div>
+          <span class="pill" id="libraryBtn">📚 Library</span>
+        </div>
+        <div class="proj-meta">
+          <div class="meta-row"><span>Author</span><span id="authorMeta">—</span></div>
+          <div class="meta-row"><span>Words</span><span id="totalWords">0</span></div>
+          <div class="meta-row"><span>Goal</span><span id="wordGoal">50,000</span></div>
+          <div class="progress"><div class="fill" id="goalFill"></div></div>
+        </div>
+        <div class="chapters" id="chaptersList"></div>
+        <div class="new-chapter">
+          <button class="btn" id="addChapterBtn">➕ New Chapter</button>
+        </div>
+      </aside>
+
+      <!-- Editor -->
+      <main class="editor-wrap">
+        <div class="ed-head">
+          <input id="chapterTitleInput" class="ed-title" placeholder="Chapter title" />
+          <span class="pill" id="chapterStatsPill">Words: 0 · Characters: 0</span>
+        </div>
+        <div class="ed-body" id="edBody">
+          <div class="page" id="page">
+            <div id="editor" class="editor" contenteditable="true" spellcheck="true"></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right panel -->
+      <aside class="right-panel" id="rightPanel">
+        <div class="rp-head">
+          <div class="rp-title" id="rpTitle">Panel</div>
+          <button class="btn icon" id="closeRightPanel">✕</button>
+        </div>
+        <div class="rp-body" id="rpBody"></div>
+      </aside>
+    </div>
+
+    <div class="status" id="statusBar">
+      <div>
+        <span id="statusBook">No book</span> • <span id="statusChapter">No chapter</span> •
+        <span id="statusSaved">Not saved</span> • <span id="statusTime"></span>
+      </div>
+      <div>
+        <span id="sprintStatus">No sprint</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Library Modal -->
+  <div class="modal" id="libraryModal" aria-hidden="true">
+    <div class="dialog">
+      <div class="dialog-h">
+        <div style="display:flex;align-items:center;gap:10px">
+          <strong>📚 Library</strong>
+          <span id="libraryCount" class="book-meta"></span>
+        </div>
+        <div>
+          <button class="btn" id="newBookBtn">➕ New Book</button>
+          <button class="btn" id="closeLibraryBtn">✕</button>
+        </div>
+      </div>
+      <div class="dialog-b">
+        <div class="cards" id="booksGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New/Edit Book Modal -->
+  <div class="modal" id="bookModal" aria-hidden="true">
+    <div class="dialog">
+      <div class="dialog-h">
+        <strong id="bookModalTitle">New Book</strong>
+        <button class="btn" id="closeBookModal">✕</button>
+      </div>
+      <div class="dialog-b">
+        <div class="grid">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" id="bookTitle" placeholder="My Novel" />
+          </div>
+          <div class="field">
+            <label>Author</label>
+            <input type="text" id="bookAuthor" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>Genre</label>
+            <input type="text" id="bookGenre" placeholder="Fantasy, Thriller…" />
+          </div>
+          <div class="field">
+            <label>Word goal</label>
+            <input type="number" id="bookGoal" min="1000" step="500" value="50000" />
+          </div>
+          <div class="field" style="grid-column:1/3">
+            <label>Logline / Synopsis</label>
+            <textarea id="bookLogline" placeholder="A one or two sentence pitch"></textarea>
+          </div>
+          <div class="field">
+            <label>Theme</label>
+            <select id="bookTheme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="sepia">Sepia</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cover color</label>
+            <input type="text" id="bookCover" placeholder="#5b7cfa" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn primary" id="saveBookBtn">Save</button>
+          <button class="btn" id="cancelBookBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Find & Replace Modal -->
+  <div class="modal" id="findModal">
+    <div class="dialog">
+      <div class="dialog-h">
+        <strong>Find & Replace</strong>
+        <button class="btn" id="closeFindModal">✕</button>
+      </div>
+      <div class="dialog-b">
+        <div class="grid">
+          <div class="field">
+            <label>Find</label>
+            <input type="text" id="findText" />
+          </div>
+          <div class="field">
+            <label>Replace with</label>
+            <input type="text" id="replaceText" />
+          </div>
+        </div>
+        <div class="row" style="margin:8px 0 12px">
+          <label class="row" style="gap:6px"><input type="checkbox" id="findCase" /> Case sensitive</label>
+          <label class="row" style="gap:6px"><input type="checkbox" id="findWhole" /> Whole word</label>
+        </div>
+        <div class="row">
+          <button class="btn" id="findNextBtn">Find next</button>
+          <button class="btn" id="replaceBtn">Replace</button>
+          <button class="btn" id="replaceAllBtn">Replace all</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Modal -->
+  <div class="modal" id="backupModal">
+    <div class="dialog">
+      <div class="dialog-h">
+        <strong>Backup & Restore</strong>
+        <button class="btn" id="closeBackupModal">✕</button>
+      </div>
+      <div class="dialog-b">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div>
+              <strong>Export Library JSON</strong>
+              <div class="book-meta">Download all books, chapters, characters, and notes as a single JSON.</div>
+            </div>
+            <button class="btn" id="exportJSONBtn">⬇ Export JSON</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div>
+              <strong>Import Library JSON</strong>
+              <div class="book-meta">Import a previously exported library backup.</div>
+            </div>
+            <input type="file" id="importJSONFile" accept="application/json" />
+            <button class="btn" id="importJSONBtn">⬆ Import</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div>
+              <strong>Snapshots</strong>
+              <div class="book-meta">Capture time-stamped snapshots of your current book.</div>
+            </div>
+            <button class="btn" id="snapshotBtn">📸 Take Snapshot</button>
+          </div>
+          <div id="snapshotsList" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sprint Modal -->
+  <div class="modal" id="sprintModal">
+    <div class="dialog">
+      <div class="dialog-h">
+        <strong>Word Sprint</strong>
+        <button class="btn" id="closeSprintModal">✕</button>
+      </div>
+      <div class="dialog-b">
+        <div class="grid">
+          <div class="field">
+            <label>Duration (minutes)</label>
+            <input type="number" id="sprintMinutes" min="1" value="25" />
+          </div>
+          <div class="field">
+            <label>Target words</label>
+            <input type="number" id="sprintTarget" min="50" step="25" value="500" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn success" id="startSprintBtn">Start Sprint</button>
+          <button class="btn" id="stopSprintBtn">Stop</button>
+        </div>
+        <div id="sprintInfo" style="margin-top:10px;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    ;(() => {
+      const $ = sel => document.querySelector(sel)
+      const $$ = sel => Array.from(document.querySelectorAll(sel))
+      const nowISO = () => new Date().toISOString()
+      const fmtTime = d => new Date(d).toLocaleTimeString()
+      const clamp = (n,min,max)=>Math.max(min,Math.min(max,n))
+
+      class Store {
+        static KEY = 'novelcraft_v2'
+        static load() {
+          try {
+            const raw = localStorage.getItem(Store.KEY)
+            if (raw) return JSON.parse(raw)
+            // migrate v1 if any
+            const legacy = localStorage.getItem('novelcraft_data')
+            if (legacy) {
+              const d = JSON.parse(legacy)
+              const book = {
+                id: 'book-'+Date.now(),
+                title: 'Migrated Book',
+                author: '',
+                genre: '',
+                logline: '',
+                goal: d.wordGoal || 50000,
+                theme: localStorage.getItem('novelcraft_theme') || 'light',
+                cover: '#5b7cfa',
+                createdAt: nowISO(),
+                updatedAt: nowISO(),
+                chapters: d.chapters || [],
+                characters: d.characters || [],
+                notes: d.notes || [],
+                snapshots: []
+              }
+              const lib = { books:[book], activeBookId: book.id }
+              localStorage.setItem(Store.KEY, JSON.stringify(lib))
+              return lib
+            }
+          } catch(e){ console.warn('load error', e) }
+          return { books:[], activeBookId:null }
+        }
+        static save(data){ localStorage.setItem(Store.KEY, JSON.stringify(data)) }
+        static download(filename, content, type='text/plain'){
+          const blob = new Blob([content], {type}); const url = URL.createObjectURL(blob)
+          const a = document.createElement('a'); a.href = url; a.download = filename
+          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+        }
+      }
+
+      class NovelCraft {
+        constructor(){
+          this.library = Store.load()
+          if (this.library.books.length === 0) this.createBook({title:'My First Book', author:'', goal:50000})
+          this.book = this.getActiveBook()
+          if (!this.book) { this.book = this.library.books[0]; this.library.activeBookId = this.book.id; Store.save(this.library) }
+          if (!this.book.chapters?.length) this.addChapter('Chapter 1')
+
+          this.currentChapterId = this.book.chapters[0].id
+          this.focusMode = false
+          this.typewriter = false
+          this.sprint = null // {endAt, startWords, target}
+
+          this.mount()
+          this.renderAll()
+          this.autosave()
+        }
+
+        /* Library management */
+        createBook({title='Untitled Book', author='', genre='', logline='', goal=50000, theme='light', cover='#5b7cfa'}={}){
+          const book = {
+            id: 'book-'+Date.now()+Math.random().toString(36).slice(2,6),
+            title, author, genre, logline, goal, theme, cover,
+            createdAt: nowISO(), updatedAt: nowISO(),
+            chapters: [], characters: [], notes: [], snapshots:[]
+          }
+          this.library.books.unshift(book)
+          this.library.activeBookId = book.id
+          Store.save(this.library)
+          this.book = book
+          return book
+        }
+        getActiveBook(){ return this.library.books.find(b => b.id === this.library.activeBookId) || null }
+        setActiveBook(id){
+          const b = this.library.books.find(x=>x.id===id); if (!b) return
+          this.library.activeBookId = id; this.book = b; this.currentChapterId = b.chapters[0]?.id || null
+          document.body.setAttribute('data-theme', b.theme || 'light')
+          $('#themeSelect').value = b.theme || 'light'
+          Store.save(this.library)
+          this.renderAll()
+        }
+        updateBookMeta(patch){
+          Object.assign(this.book, patch, {updatedAt: nowISO()})
+          Store.save(this.library)
+          this.renderBookMeta()
+        }
+        deleteBook(id){
+          if (!confirm('Delete this book permanently?')) return
+          const idx = this.library.books.findIndex(b=>b.id===id)
+          if (idx>=0){ this.library.books.splice(idx,1) }
+          if (!this.library.books.length){ this.createBook({title:'New Book'}) }
+          this.library.activeBookId = this.library.books[0].id
+          this.book = this.getActiveBook()
+          Store.save(this.library)
+          this.renderAll()
+        }
+        duplicateBook(id){
+          const src = this.library.books.find(b=>b.id===id); if (!src) return
+          const copy = JSON.parse(JSON.stringify(src))
+          copy.id = 'book-'+Date.now()+Math.random().toString(36).slice(2,6)
+          copy.title = src.title + ' (Copy)'
+          copy.createdAt = nowISO(); copy.updatedAt = nowISO()
+          this.library.books.unshift(copy)
+          Store.save(this.library)
+          this.renderLibrary()
+        }
+
+        /* Chapters */
+        addChapter(title='New Chapter'){
+          const ch = { id:'ch-'+Date.now()+Math.random().toString(36).slice(2,5), title, content:'', wordCount:0, createdAt:nowISO(), updatedAt:nowISO() }
+          this.book.chapters.push(ch)
+          this.currentChapterId = ch.id
+          this.save()
+          this.renderChapters()
+          this.loadChapter(ch.id)
+        }
+        deleteChapter(id){
+          if (this.book.chapters.length<=1){ alert('At least one chapter is required.'); return }
+          if (!confirm('Delete this chapter?')) return
+          const idx = this.book.chapters.findIndex(c=>c.id===id)
+          if (idx>=0){ this.book.chapters.splice(idx,1) }
+          this.currentChapterId = this.book.chapters[0].id
+          this.save(); this.renderChapters(); this.loadChapter(this.currentChapterId)
+        }
+        reorderChapters(fromIdx,toIdx){
+          const arr = this.book.chapters
+          const [moved] = arr.splice(fromIdx,1)
+          arr.splice(toIdx,0,moved)
+          this.save(); this.renderChapters()
+        }
+        currentChapter(){ return this.book.chapters.find(c=>c.id===this.currentChapterId) }
+
+        /* Characters & Notes */
+        addCharacter(name, description){ this.book.characters.push({id:'char-'+Date.now(), name, description, createdAt:nowISO()}); this.save() }
+        addNote(title, content){ this.book.notes.push({id:'note-'+Date.now(), title, content, createdAt:nowISO()}); this.save() }
+
+        /* Snapshots */
+        takeSnapshot(){
+          const snap = {
+            id:'snap-'+Date.now(),
+            timestamp: nowISO(),
+            bookTitle: this.book.title,
+            data: {
+              chapters: this.book.chapters,
+              characters: this.book.characters,
+              notes: this.book.notes
+            }
+          }
+          // Limit snapshots to 50
+          this.book.snapshots = [snap, ...(this.book.snapshots||[])].slice(0,50)
+          this.save()
+          this.renderSnapshots()
+          alert('Snapshot captured.')
+        }
+        restoreSnapshot(id){
+          const s = (this.book.snapshots||[]).find(x=>x.id===id); if (!s) return
+          if (!confirm('Restore snapshot? This will overwrite current chapters/characters/notes.')) return
+          this.book.chapters = JSON.parse(JSON.stringify(s.data.chapters))
+          this.book.characters = JSON.parse(JSON.stringify(s.data.characters))
+          this.book.notes = JSON.parse(JSON.stringify(s.data.notes))
+          this.currentChapterId = this.book.chapters[0]?.id || null
+          this.save(); this.renderAll()
+        }
+
+        /* Mount & Events */
+        mount(){
+          // Topbar
+          $('#appMenuBtn').addEventListener('click', ()=> this.openLibrary())
+          $('#toggleSidebarBtn').addEventListener('click', ()=> this.toggleSidebar())
+          $('#saveBtn').addEventListener('click', ()=> this.save(true))
+          $('#exportBtn').addEventListener('click', ()=> this.openExport())
+          $('#backupBtn').addEventListener('click', ()=> this.openBackup())
+          $('#boldBtn').addEventListener('click', ()=> this.exec('bold'))
+          $('#italicBtn').addEventListener('click', ()=> this.exec('italic'))
+          $('#underlineBtn').addEventListener('click', ()=> this.exec('underline'))
+          $('#findBtn').addEventListener('click', ()=> this.openFind())
+
+          $('#themeSelect').addEventListener('change', e=>{
+            document.body.setAttribute('data-theme', e.target.value)
+            this.updateBookMeta({theme:e.target.value})
+          })
+          $('#focusBtn').addEventListener('click', ()=> this.toggleFocus())
+          $('#fullscreenBtn').addEventListener('click', ()=> this.toggleFullscreen())
+          $('#typewriterBtn').addEventListener('click', ()=> this.toggleTypewriter())
+
+          $('#charactersBtn').addEventListener('click', ()=> this.openCharacters())
+          $('#notesBtn').addEventListener('click', ()=> this.openNotes())
+          $('#sprintBtn').addEventListener('click', ()=> this.openSprint())
+
+          // Sidebar
+          $('#libraryBtn').addEventListener('click', ()=> this.openLibrary())
+          $('#addChapterBtn').addEventListener('click', ()=> this.promptNewChapter())
+
+          // Editor
+          $('#editor').addEventListener('input', ()=> this.onEditorInput())
+          $('#chapterTitleInput').addEventListener('input', ()=> this.onTitleInput())
+
+          // Right panel
+          $('#closeRightPanel').addEventListener('click', ()=> this.closeRightPanel())
+
+          // Library modal
+          $('#newBookBtn').addEventListener('click', ()=> this.openBookModal())
+          $('#closeLibraryBtn').addEventListener('click', ()=> this.closeModal('#libraryModal'))
+
+          // Book modal
+          $('#closeBookModal').addEventListener('click', ()=> this.closeModal('#bookModal'))
+          $('#cancelBookBtn').addEventListener('click', ()=> this.closeModal('#bookModal'))
+          $('#saveBookBtn').addEventListener('click', ()=> this.saveBookFromModal())
+
+          // Find modal
+          $('#closeFindModal').addEventListener('click', ()=> this.closeModal('#findModal'))
+          $('#findNextBtn').addEventListener('click', ()=> this.findNext())
+          $('#replaceBtn').addEventListener('click', ()=> this.replaceOne())
+          $('#replaceAllBtn').addEventListener('click', ()=> this.replaceAll())
+
+          // Backup modal
+          $('#closeBackupModal').addEventListener('click', ()=> this.closeModal('#backupModal'))
+          $('#exportJSONBtn').addEventListener('click', ()=> this.exportLibraryJSON())
+          $('#importJSONBtn').addEventListener('click', ()=> this.importLibraryJSON())
+          $('#snapshotBtn').addEventListener('click', ()=> this.takeSnapshot())
+
+          // Sprint modal
+          $('#closeSprintModal').addEventListener('click', ()=> this.closeModal('#sprintModal'))
+          $('#startSprintBtn').addEventListener('click', ()=> this.startSprint())
+          $('#stopSprintBtn').addEventListener('click', ()=> this.stopSprint())
+
+          // Keyboard
+          document.addEventListener('keydown', e=>{
+            const meta = e.ctrlKey || e.metaKey
+            if (meta && e.key.toLowerCase()==='s'){ e.preventDefault(); this.save(true) }
+            if (meta && e.key.toLowerCase()==='b'){ e.preventDefault(); this.exec('bold') }
+            if (meta && e.key.toLowerCase()==='i'){ e.preventDefault(); this.exec('italic') }
+            if (meta && e.key.toLowerCase()==='u'){ e.preventDefault(); this.exec('underline') }
+            if (meta && e.key.toLowerCase()==='m'){ e.preventDefault(); this.openLibrary() }
+            if (meta && e.key === '\\'){ e.preventDefault(); this.toggleSidebar() }
+            if (meta && e.key.toLowerCase()==='f'){ e.preventDefault(); this.openFind() }
+          })
+
+          // Leave protection
+          window.addEventListener('beforeunload', (e)=>{
+            this.save()
+            e.returnValue = ''
+          })
+
+          // Clock tick + Sprint tick
+          setInterval(()=> this.tick(), 1000)
+        }
+
+        /* Rendering */
+        renderAll(){
+          this.renderBookMeta()
+          this.renderChapters()
+          this.loadChapter(this.currentChapterId)
+          this.renderStatus()
+        }
+        renderBookMeta(){
+          $('#bookTitleSide').textContent = this.book.title || 'Untitled Book'
+          $('#authorMeta').textContent = this.book.author || '—'
+          $('#wordGoal').textContent = (this.book.goal||0).toLocaleString()
+          document.body.setAttribute('data-theme', this.book.theme || 'light')
+          $('#themeSelect').value = this.book.theme || 'light'
+          this.updateTotals()
+        }
+        renderChapters(){
+          const list = $('#chaptersList'); list.innerHTML = ''
+          this.book.chapters.forEach((c, idx)=>{
+            const el = document.createElement('div')
+            el.className = 'chapter' + (c.id===this.currentChapterId ? ' active':'')
+
+            el.draggable = true
+            el.addEventListener('dragstart', ev=>{
+              ev.dataTransfer.setData('text/plain', idx)
+            })
+            el.addEventListener('dragover', ev=> ev.preventDefault())
+            el.addEventListener('drop', ev=>{
+              ev.preventDefault()
+              const from = +ev.dataTransfer.getData('text/plain')
+              const to = idx
+              if (from!==to) this.reorderChapters(from,to)
+            })
+
+            el.innerHTML = `
+              <span class="drag">⋮⋮</span>
+              <span class="name">${c.title || 'Untitled'}</span>
+              <span class="stats">${c.wordCount||0}w</span>
+            `
+            el.addEventListener('click', ()=> this.loadChapter(c.id))
+            el.addEventListener('contextmenu', (e)=>{
+              e.preventDefault()
+              this.contextChapter(e, c)
+            })
+            list.appendChild(el)
+          })
+        }
+        loadChapter(id){
+          const ch = this.book.chapters.find(c=>c.id===id) || this.book.chapters[0]
+          if (!ch) return
+          this.currentChapterId = ch.id
+          $('#chapterTitleInput').value = ch.title || ''
+          $('#editor').innerHTML = ch.content || ''
+          this.renderChapters()
+          this.updateChapterStatsDisplay()
+          this.renderStatus()
+          // keep typewriter centered
+          if (this.typewriter) setTimeout(()=> this.scrollCaretIntoView(), 50)
+        }
+        updateChapterStatsDisplay(){
+          const ch = this.currentChapter(); if (!ch) return
+          $('#chapterStatsPill').textContent = `Words: ${ch.wordCount||0} · Characters: ${this.stripHTML(ch.content||'').length}`
+        }
+        updateTotals(){
+          const totalWords = (this.book.chapters||[]).reduce((s,c)=> s + (c.wordCount||0), 0)
+          $('#totalWords').textContent = totalWords.toLocaleString()
+          const goal = this.book.goal || 0
+          const pct = goal ? clamp((totalWords/goal)*100,0,100) : 0
+          $('#goalFill').style.width = pct+'%'
+        }
+        renderStatus(){
+          $('#statusBook').textContent = `Book: ${this.book.title}`
+          const ch = this.currentChapter()
+          $('#statusChapter').textContent = ch ? `Chapter: ${ch.title}` : 'No chapter'
+          $('#statusSaved').textContent = `Updated: ${fmtTime(this.book.updatedAt)}`
+        }
+
+        /* Context menu for chapter */
+        contextChapter(e, ch){
+          const menu = document.createElement('div')
+          Object.assign(menu.style, {
+            position:'fixed', left: e.clientX+'px', top: e.clientY+'px', background:'var(--bg-2)',
+            border:'1px solid var(--line)', borderRadius:'10px', boxShadow:'var(--shadow)', zIndex:50
+          })
+          ;[
+            {t:'Rename', fn: ()=>{
+              const name = prompt('Chapter title', ch.title || '')
+              if (name!=null){ ch.title = name; ch.updatedAt = nowISO(); this.save(); this.renderChapters(); this.loadChapter(ch.id) }
+            }},
+            {t:'Duplicate', fn: ()=>{
+              const copy = JSON.parse(JSON.stringify(ch))
+              copy.id = 'ch-'+Date.now()
+              copy.title = ch.title+' (Copy)'
+              this.book.chapters.splice(this.book.chapters.indexOf(ch)+1, 0, copy)
+              this.save(); this.renderChapters()
+            }},
+            {t:'Delete', fn: ()=> this.deleteChapter(ch.id)}
+          ].forEach(row=>{
+            const item = document.createElement('div')
+            item.textContent = row.t
+            Object.assign(item.style, {padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--line)'})
+            item.addEventListener('click', ()=> { row.fn(); document.body.removeChild(menu) })
+            menu.appendChild(item)
+          })
+          document.body.appendChild(menu)
+          const cleanup = ()=> { if (menu.parentNode) menu.parentNode.removeChild(menu); document.removeEventListener('click', cleanup) }
+          setTimeout(()=> document.addEventListener('click', cleanup), 0)
+        }
+
+        /* Events */
+        onEditorInput(){
+          const ch = this.currentChapter(); if (!ch) return
+          ch.content = $('#editor').innerHTML
+          ch.wordCount = this.countWords(ch.content)
+          ch.updatedAt = nowISO()
+          this.book.updatedAt = nowISO()
+          this.updateChapterStatsDisplay()
+          this.updateTotals()
+        }
+        onTitleInput(){
+          const ch = this.currentChapter(); if (!ch) return
+          ch.title = $('#chapterTitleInput').value
+          ch.updatedAt = nowISO(); this.book.updatedAt = nowISO()
+          this.renderChapters(); this.renderStatus()
+        }
+
+        /* Formatting */
+        exec(cmd){
+          document.execCommand(cmd, false, null)
+          $('#editor').focus()
+        }
+        stripHTML(html){ return (html||'').replace(/<[^>]+>/g,'') }
+        countWords(html){
+          const s = this.stripHTML(html).trim()
+          return s ? s.split(/\s+/).length : 0
+        }
+
+        /* Sidebar & Modes */
+        toggleSidebar(){
+          const s = $('#sidebar')
+          const isCollapsed = s.classList.toggle('collapsed')
+          if (!isCollapsed && window.innerWidth <= 1000){
+            s.classList.add('backdrop')
+            const closeOnBackdrop = ev=>{
+              if (!s.contains(ev.target)){ s.classList.add('collapsed'); s.classList.remove('backdrop'); document.removeEventListener('click', closeOnBackdrop) }
+            }
+            setTimeout(()=> document.addEventListener('click', closeOnBackdrop), 0)
+          } else {
+            s.classList.remove('backdrop')
+          }
+        }
+        toggleFocus(){
+          this.focusMode = !this.focusMode
+          document.body.classList.toggle('focus', this.focusMode)
+          $('#focusBtn').classList.toggle('primary', this.focusMode)
+        }
+        toggleTypewriter(){
+          this.typewriter = !this.typewriter
+          $('#typewriterBtn').classList.toggle('primary', this.typewriter)
+          $('#page').classList.toggle('typewriter', this.typewriter)
+          if (this.typewriter) this.scrollCaretIntoView()
+        }
+        toggleFullscreen(){
+          if (!document.fullscreenElement){ document.documentElement.requestFullscreen?.() }
+          else { document.exitFullscreen?.() }
+        }
+        scrollCaretIntoView(){
+          const sel = window.getSelection()
+          if (!sel.rangeCount) return
+          const r = sel.getRangeAt(0)
+          const rect = r.getBoundingClientRect()
+          const container = $('#edBody')
+          const cRect = container.getBoundingClientRect()
+          const targetY = cRect.top + cRect.height*0.4
+          const diff = rect.top - targetY
+          container.scrollBy({top: diff, behavior:'smooth'})
+        }
+
+        /* Library UI */
+        openLibrary(){
+          this.renderLibrary()
+          this.showModal('#libraryModal')
+        }
+        renderLibrary(){
+          const grid = $('#booksGrid'); grid.innerHTML = ''
+          $('#libraryCount').textContent = `${this.library.books.length} book(s)`
+          this.library.books.forEach(b=>{
+            const card = document.createElement('div')
+            card.className = 'book'
+            const words = (b.chapters||[]).reduce((s,c)=> s + (c.wordCount||0), 0)
+            card.innerHTML = `
+              <div class="book-head">
+                <div class="cover" style="background:${b.cover||'linear-gradient(135deg,var(--brand),var(--brand-2))'}"></div>
+                <div>
+                  <div class="book-title">${b.title}</div>
+                  <div class="book-meta">${b.author||'Unknown'} • ${words.toLocaleString()} words</div>
+                </div>
+                <div style="margin-left:auto">${b.id===this.library.activeBookId?'<span class="pill">Active</span>':''}</div>
+              </div>
+              <div class="book-actions">
+                <button class="btn" data-act="open">Open</button>
+                <button class="btn" data-act="edit">Edit</button>
+                <button class="btn" data-act="dup">Duplicate</button>
+                <button class="btn danger" data-act="del">Delete</button>
+              </div>
+            `
+            card.addEventListener('click', (e)=>{
+              const act = e.target?.dataset?.act
+              if (!act) return
+              e.stopPropagation()
+              if (act==='open'){ this.setActiveBook(b.id); this.closeModal('#libraryModal') }
+              if (act==='edit'){ this.openBookModal(b) }
+              if (act==='dup'){ this.duplicateBook(b.id) }
+              if (act==='del'){ this.deleteBook(b.id); this.renderLibrary() }
+            })
+            grid.appendChild(card)
+          })
+        }
+        openBookModal(book=null){
+          $('#bookModalTitle').textContent = book ? 'Edit Book' : 'New Book'
+          $('#bookTitle').value = book?.title || ''
+          $('#bookAuthor').value = book?.author || ''
+          $('#bookGenre').value = book?.genre || ''
+          $('#bookGoal').value = book?.goal ?? 50000
+          $('#bookLogline').value = book?.logline || ''
+          $('#bookTheme').value = book?.theme || 'light'
+          $('#bookCover').value = book?.cover || '#5b7cfa'
+          $('#saveBookBtn').dataset.editId = book?.id || ''
+          this.showModal('#bookModal')
+        }
+        saveBookFromModal(){
+          const payload = {
+            title: $('#bookTitle').value.trim(),
+            author: $('#bookAuthor').value.trim(),
+            genre: $('#bookGenre').value.trim(),
+            logline: $('#bookLogline').value.trim(),
+            goal: Math.max(0, parseInt($('#bookGoal').value||'0',10)),
+            theme: $('#bookTheme').value,
+            cover: $('#bookCover').value.trim() || '#5b7cfa'
+          }
+          const editId = $('#saveBookBtn').dataset.editId
+          if (!payload.title){ alert('Please provide a title.'); return }
+          if (editId){
+            const b = this.library.books.find(x=>x.id===editId)
+            Object.assign(b, payload, {updatedAt: nowISO()})
+            if (this.book.id === editId) this.book = b
+            Store.save(this.library)
+          } else {
+            const b = this.createBook(payload)
+            if (!b.chapters.length) this.addChapter('Chapter 1')
+            this.setActiveBook(b.id)
+          }
+          this.closeModal('#bookModal')
+          this.renderLibrary()
+          this.renderAll()
+        }
+
+        /* Export */
+        openExport(){
+          const menu = document.createElement('div')
+          Object.assign(menu.style,{
+            position:'fixed', right:'14px', top:'70px', background:'var(--bg-2)', border:'1px solid var(--line)', borderRadius:'12px', boxShadow:'var(--shadow)', zIndex:40
+          })
+          ;[
+            ['Export as Text (.txt)', ()=> this.exportText()],
+            ['Export as HTML (.html)', ()=> this.exportHTML()],
+            ['Export as Markdown (.md)', ()=> this.exportMarkdown()],
+            ['Print / PDF', ()=> window.print()]
+          ].forEach(([label,fn],i)=>{
+            const item = document.createElement('div')
+            item.textContent = label
+            Object.assign(item.style,{padding:'10px 14px',cursor:'pointer', borderBottom: i<3 ? '1px solid var(--line)':''})
+            item.addEventListener('click', ()=> { fn(); cleanup() })
+            menu.appendChild(item)
+          })
+          document.body.appendChild(menu)
+          const cleanup = ()=> { if (menu.parentNode) menu.parentNode.removeChild(menu); document.removeEventListener('click', cleanup)}
+          setTimeout(()=> document.addEventListener('click', cleanup), 0)
+        }
+        exportText(){
+          let s = `# ${this.book.title}\n\n${this.book.logline?this.book.logline+'\n\n':''}`
+          this.book.chapters.forEach(ch=>{
+            s += `${ch.title}\n\n${this.stripHTML(ch.content)}\n\n`
+          })
+          Store.download(`${this.book.title.replace(/\s+/g,'_')}.txt`, s, 'text/plain')
+        }
+        exportHTML(){
+          let html = `<!doctype html><html><head><meta charset="utf-8"><title>${this.book.title}</title>
+<style>body{font-family:Georgia,serif;max-width:850px;margin:0 auto;padding:40px;line-height:1.7}h1{font-size:28px;border-bottom:2px solid #333;padding-bottom:8px}h2{page-break-before:always}</style>
+</head><body><h1>${this.book.title}</h1>${this.book.logline?`<p><em>${this.book.logline}</em></p>`:''}`
+          this.book.chapters.forEach(ch=>{
+            html += `<h2>${ch.title}</h2><div>${ch.content}</div>`
+          })
+          html += `</body></html>`
+          Store.download(`${this.book.title.replace(/\s+/g,'_')}.html`, html, 'text/html')
+        }
+        exportMarkdown(){
+          let s = `# ${this.book.title}\n\n${this.book.logline?`> ${this.book.logline}\n\n`:''}`
+          this.book.chapters.forEach(ch=>{
+            s += `## ${ch.title}\n\n${this.stripHTML(ch.content)}\n\n`
+          })
+          Store.download(`${this.book.title.replace(/\s+/g,'_')}.md`, s, 'text/markdown')
+        }
+
+        /* Backup */
+        openBackup(){ this.renderSnapshots(); this.showModal('#backupModal') }
+        renderSnapshots(){
+          const list = $('#snapshotsList'); list.innerHTML = ''
+          ;(this.book.snapshots||[]).forEach(s=>{
+            const row = document.createElement('div')
+            row.className = 'row'
+            row.style.justifyContent = 'space-between'
+            row.style.alignItems = 'center'
+            row.innerHTML = `
+              <div><strong>${new Date(s.timestamp).toLocaleString()}</strong></div>
+              <div class="row">
+                <button class="btn" data-a="dl">Download</button>
+                <button class="btn" data-a="restore">Restore</button>
+                <button class="btn danger" data-a="del">Delete</button>
+              </div>
+            `
+            row.querySelector('[data-a="dl"]').addEventListener('click', ()=>{
+              Store.download(`${this.book.title.replace(/\s+/g,'_')}_snapshot_${s.id}.json`, JSON.stringify(s, null, 2), 'application/json')
+            })
+            row.querySelector('[data-a="restore"]').addEventListener('click', ()=> this.restoreSnapshot(s.id))
+            row.querySelector('[data-a="del"]').addEventListener('click', ()=>{
+              this.book.snapshots = this.book.snapshots.filter(x=>x.id!==s.id); this.save(); this.renderSnapshots()
+            })
+            list.appendChild(row)
+          })
+          if (!list.children.length){
+            const none = document.createElement('div'); none.className='book-meta'; none.textContent='No snapshots yet.'
+            list.appendChild(none)
+          }
+        }
+        exportLibraryJSON(){
+          Store.download('novelcraft_library.json', JSON.stringify(this.library, null, 2), 'application/json')
+        }
+        importLibraryJSON(){
+          const file = $('#importJSONFile').files[0]
+          if (!file){ alert('Choose a JSON file first.'); return }
+          const reader = new FileReader()
+          reader.onload = () => {
+            try{
+              const data = JSON.parse(reader.result)
+              if (!data.books){ alert('Invalid backup format.'); return }
+              this.library = data
+              Store.save(this.library)
+              this.book = this.getActiveBook() || this.library.books[0]
+              this.renderAll()
+              alert('Library imported.')
+            } catch(e){ alert('Failed to import: '+e.message) }
+          }
+          reader.readAsText(file)
+        }
+
+        /* Characters & Notes */
+        openCharacters(){
+          const body = $('#rpBody'); body.innerHTML = ''
+          $('#rpTitle').textContent = 'Characters'
+          const add = document.createElement('button'); add.className='btn primary'; add.textContent='Add Character'
+          add.style.width = '100%'; add.addEventListener('click', ()=>{
+            const name = prompt('Character name')
+            if (!name) return
+            const desc = prompt('Short description')||''
+            this.addCharacter(name, desc); this.openCharacters()
+          })
+          body.appendChild(add)
+          this.book.characters.forEach(c=>{
+            const card = document.createElement('div')
+            card.className = 'card'
+            card.innerHTML = `<strong>${c.name}</strong><div class="book-meta">${c.description||''}</div>
+            <div style="margin-top:8px" class="row"><button class="btn" data-a="edit">Edit</button><button class="btn danger" data-a="del">Delete</button></div>`
+            card.querySelector('[data-a="edit"]').addEventListener('click', ()=>{
+              const name = prompt('Character name', c.name); if (name==null) return
+              const desc = prompt('Description', c.description||''); if (desc==null) return
+              c.name=name; c.description=desc; this.save(); this.openCharacters()
+            })
+            card.querySelector('[data-a="del"]').addEventListener('click', ()=>{
+              this.book.characters = this.book.characters.filter(x=>x.id!==c.id); this.save(); this.openCharacters()
+            })
+            body.appendChild(card)
+          })
+          this.openRightPanel()
+        }
+        openNotes(){
+          const body = $('#rpBody'); body.innerHTML = ''
+          $('#rpTitle').textContent = 'Notes'
+          const add = document.createElement('button'); add.className='btn primary'; add.textContent='Add Note'
+          add.style.width = '100%'; add.addEventListener('click', ()=>{
+            const title = prompt('Note title')
+            if (!title) return
+            const content = prompt('Note content')||''
+            this.addNote(title, content); this.openNotes()
+          })
+          body.appendChild(add)
+          this.book.notes.forEach(n=>{
+            const card = document.createElement('div')
+            card.className = 'card'
+            card.innerHTML = `<strong>${n.title}</strong><div class="book-meta">${n.content||''}</div>
+            <div style="margin-top:8px" class="row"><button class="btn" data-a="edit">Edit</button><button class="btn danger" data-a="del">Delete</button></div>`
+            card.querySelector('[data-a="edit"]').addEventListener('click', ()=>{
+              const title = prompt('Note title', n.title); if (title==null) return
+              const content = prompt('Content', n.content||''); if (content==null) return
+              n.title=title; n.content=content; this.save(); this.openNotes()
+            })
+            card.querySelector('[data-a="del"]').addEventListener('click', ()=>{
+              this.book.notes = this.book.notes.filter(x=>x.id!==n.id); this.save(); this.openNotes()
+            })
+            body.appendChild(card)
+          })
+          this.openRightPanel()
+        }
+        openRightPanel(){ $('#rightPanel').classList.add('active') }
+        closeRightPanel(){ $('#rightPanel').classList.remove('active') }
+
+        /* Find & Replace */
+        openFind(){ this.showModal('#findModal'); $('#findText').focus() }
+        getEditorText(){ return $('#editor').innerHTML }
+        setEditorHTML(html){ $('#editor').innerHTML = html; this.onEditorInput() }
+        buildRegExp(){
+          const find = $('#findText').value
+          if (!find) return null
+          const flags = $('#findCase').checked ? 'g' : 'gi'
+          const esc = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          const pat = $('#findWhole').checked ? `\\b${esc}\\b` : esc
+          return new RegExp(pat, flags)
+        }
+        findNext(){
+          const re = this.buildRegExp(); if (!re) return
+          const sel = window.getSelection()
+          const ed = $('#editor')
+          const plain = this.stripHTML(ed.innerHTML)
+          const caretIndex = sel.rangeCount ? sel.getRangeAt(0).startOffset : 0
+          re.lastIndex = caretIndex
+          const match = re.exec(plain) || re.exec(plain) // wrap search
+          if (!match){ alert('No matches.'); return }
+          // crude highlight by selecting next occurrence in HTML using text nodes traversal
+          const targetText = match[0]
+          this.selectNextOccurrence(ed, targetText, $('#findCase').checked)
+        }
+        selectNextOccurrence(root, text, caseSensitive){
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null)
+          let node
+          while (node = walker.nextNode()){
+            const hay = caseSensitive ? node.nodeValue : node.nodeValue.toLowerCase()
+            const needle = caseSensitive ? text : text.toLowerCase()
+            const idx = hay.indexOf(needle)
+            if (idx >= 0){
+              const r = document.createRange()
+              r.setStart(node, idx); r.setEnd(node, idx + text.length)
+              const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r)
+              $('#edBody').scrollTo({top: node.parentElement.offsetTop - 120, behavior:'smooth'})
+              return
+            }
+          }
+          alert('No more matches.')
+        }
+        replaceOne(){
+          const sel = window.getSelection()
+          if (!sel.rangeCount || sel.toString()===''){ this.findNext(); return }
+          const replacement = $('#replaceText').value
+          document.execCommand('insertText', false, replacement)
+          this.onEditorInput()
+          this.findNext()
+        }
+        replaceAll(){
+          const re = this.buildRegExp(); if (!re) return
+          const html = this.stripHTML(this.getEditorText())
+          const replaced = html.replace(re, $('#replaceText').value)
+          // simple conversion back to HTML (plain text paragraphs)
+          const htmlOut = replaced.split(/\n{2,}/).map(p=> `<p>${p.replace(/\n/g,'<br>')}</p>`).join('')
+          this.setEditorHTML(htmlOut)
+          alert('All occurrences replaced.')
+        }
+
+        /* Sprint */
+        openSprint(){ this.showModal('#sprintModal'); this.renderSprintInfo() }
+        startSprint(){
+          const minutes = Math.max(1, parseInt($('#sprintMinutes').value||'25',10))
+          const target = Math.max(0, parseInt($('#sprintTarget').value||'500',10))
+          const startWords = (this.book.chapters||[]).reduce((s,c)=> s + (c.wordCount||0), 0)
+          this.sprint = { endAt: Date.now() + minutes*60*1000, target, startWords }
+          this.renderSprintInfo(); this.closeModal('#sprintModal')
+        }
+        stopSprint(){ this.sprint = null; this.renderSprintInfo() }
+        renderSprintInfo(){
+          if (!this.sprint){ $('#sprintInfo').textContent = 'No active sprint.'; $('#sprintStatus').textContent = 'No sprint'; return }
+          const remain = Math.max(0, Math.floor((this.sprint.endAt - Date.now())/1000))
+          const m = Math.floor(remain/60), s = String(remain%60).padStart(2,'0')
+          const totalWords = (this.book.chapters||[]).reduce((s,c)=> s + (c.wordCount||0), 0)
+          const delta = totalWords - this.sprint.startWords
+          $('#sprintInfo').textContent = `Time left: ${m}:${s} • Words: +${delta} / ${this.sprint.target}`
+          $('#sprintStatus').textContent = `Sprint ${m}:${s} • +${delta}/${this.sprint.target}`
+        }
+
+        /* Save & Autosave */
+        save(force=false){
+          this.book.updatedAt = nowISO()
+          Store.save(this.library)
+          if (force) alert('Saved.')
+          this.renderStatus()
+        }
+        autosave(){
+          setInterval(()=> this.save(), 15000)
+        }
+
+        /* Modal utils */
+        showModal(sel){ const m = $(sel); m.classList.add('show') }
+        closeModal(sel){ const m = $(sel); m.classList.remove('show') }
+
+        /* Misc */
+        promptNewChapter(){
+          const t = prompt('New chapter title','Chapter '+(this.book.chapters.length+1))
+          if (t!=null) this.addChapter(t||('Chapter '+(this.book.chapters.length+1)))
+        }
+        openFind(){ this.showModal('#findModal'); $('#findText').focus() }
+
+        openBackup(){ this.renderSnapshots(); this.showModal('#backupModal') }
+
+        tick(){
+          $('#statusTime').textContent = new Date().toLocaleTimeString()
+          if (this.sprint){
+            this.renderSprintInfo()
+            if (Date.now() >= this.sprint.endAt){
+              alert('Sprint finished! Great job.')
+              this.stopSprint()
+            }
+          }
+        }
+      }
+
+      // Instantiate
+      const app = new NovelCraft()
+      // expose for console
+      window.novelcraft = app
+    })()
+  </script>
+</body>
+</html>
