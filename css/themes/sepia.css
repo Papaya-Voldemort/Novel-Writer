@@ -1,0 +1,15 @@
+/* Sepia Theme */
+[data-theme="sepia"] {
+  --bg: #f6f1e6;
+  --bg-2: #f1eadc;
+  --bg-3: #e7decc;
+  --ink: #3a2e22;
+  --muted: #7a6a57;
+  --line: #d8ccb7;
+  --brand: #9b6b44;
+  --brand-2: #7d5536;
+  --danger: #c2431b;
+  --success: #6b7c32;
+  --warn: #d69e2e;
+  --shadow: 0 12px 30px rgba(66,47,28,.18), 0 4px 12px rgba(66,47,28,.12);
+}

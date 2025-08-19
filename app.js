@@ -35,6 +35,9 @@
       this.focusMode = false
       this.typewriter = false
       this.sound = new window.TypewriterSound()
+      
+      // Panel tracking
+      this.currentPanel = null
 
       this.mount()
       this.renderAll()
@@ -185,8 +188,9 @@
       $('#typewriterBtn').addEventListener('click', ()=> this.toggleTypewriter())
 
       // Panels
-      $('#charactersBtn').addEventListener('click', ()=> this.openCharacters())
-      $('#notesBtn').addEventListener('click', ()=> this.openNotes())
+      $('#charactersBtn').addEventListener('click', ()=> this.togglePanel('characters'))
+      $('#notesBtn').addEventListener('click', ()=> this.togglePanel('notes'))
+      $('#outlineBtn').addEventListener('click', ()=> this.togglePanel('outline'))
       $('#closeRightPanel').addEventListener('click', ()=> this.closeRightPanel())
       $('#soundToggle').addEventListener('change', (e)=> this.sound.setEnabled(e.target.checked))
 
@@ -464,6 +468,35 @@
       if (Math.abs(diff) > 6) container.scrollBy({top: diff, behavior:'smooth'})
     }
 
+    // Panel toggling system
+    togglePanel(panelType) {
+      if (this.currentPanel === panelType) {
+        // Close panel if clicking the same button
+        this.closeRightPanel()
+        this.currentPanel = null
+        this.updatePanelButtons()
+      } else {
+        // Open different panel
+        this.currentPanel = panelType
+        if (panelType === 'characters') this.openCharacters()
+        else if (panelType === 'notes') this.openNotes()
+        else if (panelType === 'outline') this.openOutline()
+        this.updatePanelButtons()
+      }
+    }
+
+    updatePanelButtons() {
+      // Reset all panel buttons
+      $('#charactersBtn').classList.remove('primary')
+      $('#notesBtn').classList.remove('primary')
+      $('#outlineBtn').classList.remove('primary')
+      
+      // Highlight active panel button
+      if (this.currentPanel === 'characters') $('#charactersBtn').classList.add('primary')
+      else if (this.currentPanel === 'notes') $('#notesBtn').classList.add('primary')
+      else if (this.currentPanel === 'outline') $('#outlineBtn').classList.add('primary')
+    }
+
     // Right panel visibility
     openRightPanel(){
       $('#rightPanel').classList.add('active')
@@ -472,6 +505,8 @@
     closeRightPanel(){
       $('#rightPanel').classList.remove('active')
       $('#canvas').classList.remove('with-right')
+      this.currentPanel = null
+      this.updatePanelButtons()
     }
 
     // Characters & Notes Panels

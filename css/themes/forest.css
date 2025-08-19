@@ -1,0 +1,15 @@
+/* Forest Theme - Nature-inspired earthy colors */
+[data-theme="forest"] {
+  --bg: #f8f9f7;
+  --bg-2: #f1f4ee;
+  --bg-3: #e8ede3;
+  --ink: #2d4a22;
+  --muted: #5a6b52;
+  --line: #c9d5c0;
+  --brand: #4a7c59;
+  --brand-2: #355943;
+  --danger: #b85450;
+  --success: #6b8e23;
+  --warn: #cd853f;
+  --shadow: 0 12px 30px rgba(45, 74, 34, 0.15), 0 4px 12px rgba(45, 74, 34, 0.1);
+}

@@ -1,0 +1,15 @@
+/* Light Theme */
+[data-theme="light"] {
+  --bg: #fbfbfd;
+  --bg-2: #ffffff;
+  --bg-3: #f0f2f5;
+  --ink: #14161c;
+  --muted: #6f7683;
+  --line: #e6e8ec;
+  --brand: #5b7cfa;
+  --brand-2: #3b5cff;
+  --danger: #f05151;
+  --success: #2db470;
+  --warn: #ffb020;
+  --shadow: 0 10px 28px rgba(0,0,0,.08), 0 3px 10px rgba(0,0,0,.06);
+}

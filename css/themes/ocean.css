@@ -1,0 +1,15 @@
+/* Ocean Theme - Water-inspired blues and teals */
+[data-theme="ocean"] {
+  --bg: #f7fafe;
+  --bg-2: #f0f9ff;
+  --bg-3: #e0f2fe;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: #cbd5e1;
+  --brand: #0ea5e9;
+  --brand-2: #0284c7;
+  --danger: #ef4444;
+  --success: #22d3ee;
+  --warn: #f59e0b;
+  --shadow: 0 12px 30px rgba(14, 165, 233, 0.15), 0 4px 12px rgba(14, 165, 233, 0.1);
+}
