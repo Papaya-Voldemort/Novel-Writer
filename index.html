@@ -16,39 +16,39 @@
       </div>
 
       <div class="group">
-        <button class="btn icon" id="libraryBtn" title="Library (Ctrl/Cmd+M)">☰</button>
-        <button class="btn icon" id="toggleSidebarBtn" title="Toggle chapters (Ctrl/Cmd+\\)">📚</button>
-        <button class="btn icon" id="plannerBtn" title="Planner (Ctrl/Cmd+P)">🗺</button>
-        <button class="btn icon" id="outlineBtn" title="Outline">🧭</button>
+        <button class="btn icon" id="libraryBtn" title="Library (Ctrl/Cmd+M)" aria-label="Open library">☰</button>
+        <button class="btn icon" id="toggleSidebarBtn" title="Toggle chapters (Ctrl/Cmd+\\)" aria-label="Toggle chapters sidebar">📚</button>
+        <button class="btn icon" id="plannerBtn" title="Planner (Ctrl/Cmd+P)" aria-label="Open novel planner">🗺</button>
+        <button class="btn icon" id="outlineBtn" title="Outline" aria-label="Show chapter outline">🧭</button>
       </div>
 
       <div class="group">
-        <button class="btn" id="saveBtn">💾 Save</button>
-        <button class="btn" id="exportBtn">📤 Export</button>
-        <button class="btn" id="backupBtn">🧰 Backup</button>
+        <button class="btn" id="saveBtn" aria-label="Save current work">💾 Save</button>
+        <button class="btn" id="exportBtn" aria-label="Export book">📤 Export</button>
+        <button class="btn" id="backupBtn" aria-label="Backup and restore">🧰 Backup</button>
       </div>
 
       <div class="group">
-        <button class="btn" id="boldBtn"><b>B</b></button>
-        <button class="btn" id="italicBtn"><i>I</i></button>
-        <button class="btn" id="underlineBtn"><u>U</u></button>
-        <button class="btn" id="h1Btn">H1</button>
-        <button class="btn" id="h2Btn">H2</button>
-        <button class="btn" id="h3Btn">H3</button>
-        <button class="btn" id="findBtn">🔎 Find</button>
+        <button class="btn" id="boldBtn" title="Bold (Ctrl/Cmd+B)" aria-label="Make text bold"><b>B</b></button>
+        <button class="btn" id="italicBtn" title="Italic (Ctrl/Cmd+I)" aria-label="Make text italic"><i>I</i></button>
+        <button class="btn" id="underlineBtn" title="Underline (Ctrl/Cmd+U)" aria-label="Underline text"><u>U</u></button>
+        <button class="btn" id="h1Btn" title="Heading 1" aria-label="Format as heading 1">H1</button>
+        <button class="btn" id="h2Btn" title="Heading 2" aria-label="Format as heading 2">H2</button>
+        <button class="btn" id="h3Btn" title="Heading 3" aria-label="Format as heading 3">H3</button>
+        <button class="btn" id="findBtn" title="Find and Replace (Ctrl/Cmd+F)" aria-label="Find and replace text">🔎 Find</button>
       </div>
 
       <div class="group grow"></div>
 
       <div class="group">
-        <select id="themeSelect" class="btn">
+        <select id="themeSelect" class="btn" aria-label="Select theme">
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="sepia">Sepia</option>
         </select>
-        <button class="btn" id="focusBtn">🎯 Focus</button>
-        <button class="btn" id="fullscreenBtn">⛶ Full</button>
-        <button class="btn" id="typewriterBtn">⌨ Typewriter</button>
+        <button class="btn" id="focusBtn" title="Focus mode" aria-label="Toggle focus mode">🎯 Focus</button>
+        <button class="btn" id="fullscreenBtn" title="Fullscreen" aria-label="Toggle fullscreen">⛶ Full</button>
+        <button class="btn" id="typewriterBtn" title="Typewriter mode" aria-label="Toggle typewriter mode">⌨ Typewriter</button>
       </div>
 
       <div class="group">
@@ -114,46 +114,51 @@
     </footer>
   </div>
 
+  <!-- Notification System -->
+  <div id="notificationContainer" class="notification-container" aria-live="polite"></div>
+
   <!-- Library Modal -->
-  <div class="modal" id="libraryModal" aria-hidden="true">
+  <div class="modal" id="libraryModal" role="dialog" aria-labelledby="libraryModalTitle" aria-hidden="true">
     <div class="dialog wide">
       <div class="dialog-h">
-        <strong>📚 Library</strong>
+        <strong id="libraryModalTitle">📚 Library</strong>
         <div class="row">
           <span id="libraryCount" class="muted"></span>
-          <button class="btn" id="newBookBtn">➕ New Book</button>
-          <button class="btn" id="closeLibraryBtn" title="Close">✕</button>
+          <button class="btn" id="newBookBtn" aria-label="Create new book">➕ New Book</button>
+          <button class="btn" id="closeLibraryBtn" title="Close" aria-label="Close library">✕</button>
         </div>
       </div>
       <div class="dialog-b">
-        <div class="cards" id="booksGrid"></div>
+        <div class="cards" id="booksGrid" role="grid" aria-label="Books in library"></div>
       </div>
     </div>
   </div>
 
   <!-- Book Modal -->
-  <div class="modal" id="bookModal" aria-hidden="true">
+  <div class="modal" id="bookModal" role="dialog" aria-labelledby="bookModalTitle" aria-hidden="true">
     <div class="dialog">
       <div class="dialog-h">
         <strong id="bookModalTitle">New Book</strong>
-        <button class="btn" id="closeBookModal" title="Close">✕</button>
+        <button class="btn" id="closeBookModal" title="Close" aria-label="Close book editor">✕</button>
       </div>
       <div class="dialog-b">
-        <div class="grid two">
-          <div class="field"><label>Title</label><input type="text" id="bookTitle" placeholder="My Novel"></div>
-          <div class="field"><label>Author</label><input type="text" id="bookAuthor" placeholder="Your name"></div>
-          <div class="field"><label>Genre</label><input type="text" id="bookGenre" placeholder="Fantasy, Thriller…"></div>
-          <div class="field"><label>Word goal</label><input type="number" id="bookGoal" min="1000" step="500" value="50000"></div>
-          <div class="field full"><label>Logline / Synopsis</label><textarea id="bookLogline" placeholder="A one or two sentence pitch"></textarea></div>
-          <div class="field"><label>Theme</label>
-            <select id="bookTheme"><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option></select>
+        <form id="bookForm">
+          <div class="grid two">
+            <div class="field"><label for="bookTitle">Title</label><input type="text" id="bookTitle" placeholder="My Novel" required></div>
+            <div class="field"><label for="bookAuthor">Author</label><input type="text" id="bookAuthor" placeholder="Your name"></div>
+            <div class="field"><label for="bookGenre">Genre</label><input type="text" id="bookGenre" placeholder="Fantasy, Thriller…"></div>
+            <div class="field"><label for="bookGoal">Word goal</label><input type="number" id="bookGoal" min="1000" step="500" value="50000"></div>
+            <div class="field full"><label for="bookLogline">Logline / Synopsis</label><textarea id="bookLogline" placeholder="A one or two sentence pitch"></textarea></div>
+            <div class="field"><label for="bookTheme">Theme</label>
+              <select id="bookTheme"><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option></select>
+            </div>
+            <div class="field"><label for="bookCover">Cover color</label><input type="text" id="bookCover" placeholder="#5b7cfa"></div>
           </div>
-          <div class="field"><label>Cover color</label><input type="text" id="bookCover" placeholder="#5b7cfa"></div>
-        </div>
-        <div class="row end">
-          <button class="btn primary" id="saveBookBtn">Save</button>
-          <button class="btn" id="cancelBookBtn">Cancel</button>
-        </div>
+          <div class="row end">
+            <button class="btn primary" id="saveBookBtn" type="submit">Save</button>
+            <button class="btn" id="cancelBookBtn" type="button">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -180,36 +185,36 @@
   </div>
 
   <!-- Find & Replace Modal -->
-  <div class="modal" id="findModal">
+  <div class="modal" id="findModal" role="dialog" aria-labelledby="findModalTitle" aria-hidden="true">
     <div class="dialog">
       <div class="dialog-h">
-        <strong>Find & Replace</strong>
-        <button class="btn" id="closeFindModal" title="Close">✕</button>
+        <strong id="findModalTitle">Find & Replace</strong>
+        <button class="btn" id="closeFindModal" title="Close (Esc)" aria-label="Close find and replace">✕</button>
       </div>
       <div class="dialog-b">
         <div class="grid two">
-          <div class="field"><label>Find</label><input type="text" id="findText"></div>
-          <div class="field"><label>Replace with</label><input type="text" id="replaceText"></div>
+          <div class="field"><label for="findText">Find</label><input type="text" id="findText" placeholder="Search text..."></div>
+          <div class="field"><label for="replaceText">Replace with</label><input type="text" id="replaceText" placeholder="Replacement text..."></div>
         </div>
         <div class="row">
           <label class="row small"><input type="checkbox" id="findCase"> Case sensitive</label>
           <label class="row small"><input type="checkbox" id="findWhole"> Whole word</label>
         </div>
         <div class="row">
-          <button class="btn" id="findNextBtn">Find next</button>
-          <button class="btn" id="replaceBtn">Replace</button>
-          <button class="btn" id="replaceAllBtn">Replace all</button>
+          <button class="btn" id="findNextBtn" title="Find next (Enter)">Find next</button>
+          <button class="btn" id="replaceBtn" title="Replace (Enter)">Replace</button>
+          <button class="btn" id="replaceAllBtn" title="Replace all (Shift+Enter)">Replace all</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Backup Modal -->
-  <div class="modal" id="backupModal">
+  <div class="modal" id="backupModal" role="dialog" aria-labelledby="backupModalTitle" aria-hidden="true">
     <div class="dialog wide">
       <div class="dialog-h">
-        <strong>Backup & Restore</strong>
-        <button class="btn" id="closeBackupModal">✕</button>
+        <strong id="backupModalTitle">Backup & Restore</strong>
+        <button class="btn" id="closeBackupModal" aria-label="Close backup dialog">✕</button>
       </div>
       <div class="dialog-b">
         <div class="card row between">
@@ -217,16 +222,16 @@
             <strong>Export Library JSON</strong>
             <div class="muted">All books, chapters, characters, notes, and planner.</div>
           </div>
-          <button class="btn" id="exportJSONBtn">⬇ Export JSON</button>
+          <button class="btn" id="exportJSONBtn" aria-label="Export library as JSON file">⬇ Export JSON</button>
         </div>
         <div class="card row between">
           <div>
             <strong>Import Library JSON</strong>
-            <div class="muted">Import a previously exported backup.</div>
+            <div class="muted">Import a previously exported backup. This will replace your current library.</div>
           </div>
           <div class="row">
-            <input type="file" id="importJSONFile" accept="application/json">
-            <button class="btn" id="importJSONBtn">⬆ Import</button>
+            <input type="file" id="importJSONFile" accept="application/json" aria-label="Choose JSON backup file">
+            <button class="btn" id="importJSONBtn" aria-label="Import library from JSON file">⬆ Import</button>
           </div>
         </div>
         <div class="card">
@@ -235,7 +240,7 @@
               <strong>Snapshots</strong>
               <div class="muted">Capture time-stamped snapshots of your current book.</div>
             </div>
-            <button class="btn" id="snapshotBtn">📸 Take Snapshot</button>
+            <button class="btn" id="snapshotBtn" aria-label="Take snapshot of current book">📸 Take Snapshot</button>
           </div>
           <div id="snapshotsList" style="margin-top:8px"></div>
         </div>

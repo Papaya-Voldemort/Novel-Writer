@@ -103,7 +103,10 @@
       this.loadChapter(ch.id)
     }
     deleteChapter(id){
-      if (this.book.chapters.length<=1){ alert('At least one chapter is required.'); return }
+      if (this.book.chapters.length<=1){ 
+        this.showNotification('At least one chapter is required.', 'warning')
+        return 
+      }
       if (!confirm('Delete this chapter?')) return
       this.book.chapters = this.book.chapters.filter(c=>c.id!==id)
       this.currentChapterId = this.book.chapters[0]?.id || null
@@ -137,7 +140,7 @@
       this.book.snapshots = [snap, ...(this.book.snapshots||[])].slice(0,50)
       this.save()
       this.renderSnapshots()
-      alert('Snapshot captured.')
+      this.showNotification('Snapshot captured successfully!', 'success')
     }
     restoreSnapshot(id){
       const s = (this.book.snapshots||[]).find(x=>x.id===id); if (!s) return
@@ -223,6 +226,37 @@
       // Keyboard
       document.addEventListener('keydown', e=>{
         const meta = e.ctrlKey || e.metaKey
+        const openModal = document.querySelector('.modal.show')
+        
+        // Close modal with Escape
+        if (e.key === 'Escape') {
+          if (openModal) {
+            e.preventDefault()
+            this.closeModal('#' + openModal.id)
+            return
+          }
+        }
+        
+        // Find & Replace shortcuts
+        if (openModal && openModal.id === 'findModal') {
+          if (e.key === 'Enter' && e.target.id === 'findText') {
+            e.preventDefault()
+            this.findNext()
+            return
+          }
+          if (e.key === 'Enter' && e.target.id === 'replaceText' && e.shiftKey) {
+            e.preventDefault()
+            this.replaceAll()
+            return
+          }
+          if (e.key === 'Enter' && e.target.id === 'replaceText') {
+            e.preventDefault()
+            this.replaceOne()
+            return
+          }
+        }
+        
+        // Global shortcuts
         if (meta && e.key.toLowerCase()==='s'){ e.preventDefault(); this.save(true) }
         if (meta && e.key.toLowerCase()==='b'){ e.preventDefault(); this.exec('bold') }
         if (meta && e.key.toLowerCase()==='i'){ e.preventDefault(); this.exec('italic') }
@@ -459,7 +493,10 @@
       form.querySelector('#addCharBtn').addEventListener('click', ()=>{
         const name = form.querySelector('#charName').value.trim()
         const desc = form.querySelector('#charDesc').value.trim()
-        if (!name) return alert('Please provide a name.')
+        if (!name) {
+          this.showNotification('Please provide a name.', 'warning')
+          return
+        }
         this.addCharacter(name, desc); form.querySelector('#charName').value=''; form.querySelector('#charDesc').value=''
         this.openCharacters()
       })
@@ -508,7 +545,10 @@
       form.querySelector('#addNoteBtn').addEventListener('click', ()=>{
         const title = form.querySelector('#noteTitle').value.trim()
         const content = form.querySelector('#noteContent').value.trim()
-        if (!title) return alert('Please provide a title.')
+        if (!title) {
+          this.showNotification('Please provide a title.', 'warning')
+          return
+        }
         this.addNote(title, content); form.querySelector('#noteTitle').value=''; form.querySelector('#noteContent').value=''
         this.openNotes()
       })
@@ -729,7 +769,10 @@
         cover: $('#bookCover').value.trim() || '#5b7cfa'
       }
       const editId = $('#saveBookBtn').dataset.editId
-      if (!payload.title){ alert('Please provide a title.'); return }
+      if (!payload.title){ 
+        this.showNotification('Please provide a title.', 'warning')
+        return 
+      }
       if (editId){
         const b = this.library.books.find(x=>x.id===editId)
         Object.assign(b, payload, {updatedAt: nowISO()})
@@ -824,18 +867,26 @@
     exportLibraryJSON(){ Store.download('novelcraft_library.json', JSON.stringify(this.library, null, 2), 'application/json') }
     importLibraryJSON(){
       const file = $('#importJSONFile').files[0]
-      if (!file){ alert('Choose a JSON file first.'); return }
+      if (!file){ 
+        this.showNotification('Choose a JSON file first.', 'warning')
+        return 
+      }
       const reader = new FileReader()
       reader.onload = () => {
         try{
           const data = JSON.parse(reader.result)
-          if (!data.books){ alert('Invalid backup format.'); return }
+          if (!data.books){ 
+            this.showNotification('Invalid backup format.', 'error')
+            return 
+          }
           this.library = data
           Store.save(this.library)
           this.book = this.getActiveBook() || this.library.books[0]
           this.renderAll()
-          alert('Library imported.')
-        } catch(e){ alert('Failed to import: '+e.message) }
+          this.showNotification('Library imported successfully!', 'success')
+        } catch(e){ 
+          this.showNotification('Failed to import: ' + e.message, 'error')
+        }
       }
       reader.readAsText(file)
     }
@@ -872,7 +923,7 @@
           return
         }
       }
-      alert('No more matches.')
+      this.showNotification('No more matches found.', 'info')
     }
     replaceOne(){
       const sel = window.getSelection()
@@ -888,7 +939,7 @@
       const replaced = text.replace(re, $('#replaceText').value)
       const htmlOut = replaced.split(/\n{2,}/).map(p=> `<p>${p.replace(/\n/g,'<br>')}</p>`).join('')
       this.setEditorHTML(htmlOut)
-      alert('All occurrences replaced.')
+      this.showNotification('All occurrences replaced successfully!', 'success')
     }
 
     // Utility
@@ -899,15 +950,56 @@
     save(force=false){
       this.book.updatedAt = nowISO()
       Store.save(this.library)
-      if (force) alert('Saved.')
+      if (force) this.showNotification('Book saved successfully!', 'success')
       this.renderStatus()
     }
     autosave(){ setInterval(()=> this.save(), 15000) }
     ticker(){ setInterval(()=> { $('#statusTime').textContent = new Date().toLocaleTimeString() }, 1000) }
 
     // Modal utils
-    showModal(sel){ $(sel).classList.add('show') }
-    closeModal(sel){ $(sel).classList.remove('show') }
+    showModal(sel){ 
+      $(sel).classList.add('show')
+      $(sel).setAttribute('aria-hidden', 'false')
+      // Focus first focusable element
+      const firstFocusable = $(sel).querySelector('input, button, textarea, select')
+      if (firstFocusable) firstFocusable.focus()
+    }
+    closeModal(sel){ 
+      $(sel).classList.remove('show')
+      $(sel).setAttribute('aria-hidden', 'true')
+    }
+
+    // Notification system
+    showNotification(message, type = 'info', duration = 4000) {
+      const container = $('#notificationContainer')
+      const notification = document.createElement('div')
+      notification.className = `notification ${type}`
+      
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'
+      
+      notification.innerHTML = `
+        <div class="icon">${icon}</div>
+        <div class="message">${message}</div>
+        <button class="close" aria-label="Close notification">×</button>
+      `
+      
+      const closeBtn = notification.querySelector('.close')
+      closeBtn.addEventListener('click', () => this.hideNotification(notification))
+      
+      container.appendChild(notification)
+      
+      // Auto-hide after duration
+      setTimeout(() => this.hideNotification(notification), duration)
+      
+      return notification
+    }
+
+    hideNotification(notification) {
+      if (notification.parentNode) {
+        notification.style.animation = 'slideOutRight .2s ease'
+        setTimeout(() => notification.remove(), 200)
+      }
+    }
   }
 
   // Instantiate
