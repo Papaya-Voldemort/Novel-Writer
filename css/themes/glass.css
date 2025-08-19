@@ -1,34 +1,98 @@
-/* Glass Theme - Apple-inspired translucent design */
+/* Glass Theme - Modern iOS-inspired glassmorphism design */
 [data-theme="glass"] {
-  --bg: rgba(255, 255, 255, 0.8);
-  --bg-2: rgba(255, 255, 255, 0.9);
-  --bg-3: rgba(248, 248, 248, 0.95);
+  /* Base colors with more vibrant, iOS-style translucency */
+  --bg: rgba(255, 255, 255, 0.1);
+  --bg-2: rgba(255, 255, 255, 0.15);
+  --bg-3: rgba(255, 255, 255, 0.25);
   --ink: #1d1d1f;
-  --muted: #86868b;
-  --line: rgba(0, 0, 0, 0.1);
+  --muted: #8e8e93;
+  --line: rgba(255, 255, 255, 0.2);
   --brand: #007aff;
-  --brand-2: #0056b3;
+  --brand-2: #0051d0;
   --danger: #ff3b30;
   --success: #30d158;
   --warn: #ff9500;
-  --shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  --backdrop-filter: blur(20px) saturate(180%);
+  --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  --backdrop-filter: blur(40px) saturate(180%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+/* Add a gradient background for the glass effect */
+[data-theme="glass"] body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Enhanced glass morphism effects */
 [data-theme="glass"] .topbar,
 [data-theme="glass"] .sidebar,
 [data-theme="glass"] .right-panel,
 [data-theme="glass"] .status {
   backdrop-filter: var(--backdrop-filter);
   -webkit-backdrop-filter: var(--backdrop-filter);
+  border: var(--glass-border);
+  box-shadow: var(--shadow);
 }
 
 [data-theme="glass"] .modal .dialog {
   backdrop-filter: var(--backdrop-filter);
   -webkit-backdrop-filter: var(--backdrop-filter);
+  border: var(--glass-border);
+  box-shadow: var(--shadow);
 }
 
-[data-theme="glass"] .card {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+[data-theme="glass"] .card,
+[data-theme="glass"] .btn {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: var(--glass-border);
+}
+
+/* Enhanced button glass effects */
+[data-theme="glass"] .btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="glass"] .btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="glass"] .btn.primary {
+  background: rgba(0, 122, 255, 0.3);
+  border: 1px solid rgba(0, 122, 255, 0.4);
+  color: white;
+}
+
+[data-theme="glass"] .btn.primary:hover {
+  background: rgba(0, 122, 255, 0.4);
+  border: 1px solid rgba(0, 122, 255, 0.5);
+}
+
+/* Glass effect for editor and main content */
+[data-theme="glass"] .ed-body {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  border: var(--glass-border);
+  border-radius: 20px;
+}
+
+/* Enhanced chapter cards with glass effect */
+[data-theme="glass"] .chapter {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px) saturate(120%);
+  -webkit-backdrop-filter: blur(15px) saturate(120%);
+  border: var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="glass"] .chapter:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
