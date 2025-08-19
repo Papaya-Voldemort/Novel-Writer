@@ -30,12 +30,13 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-/* Buttons and controls */
+/* Enhanced Buttons and controls */
 .btn{
   border:1px solid var(--line);background:var(--bg-2);color:var(--ink);
-  padding:9px 12px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;
-  min-height:40px;position:relative;font-size:14px;
+  padding:10px 14px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;
+  min-height:42px;position:relative;font-size:14px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 .btn:hover{
   transform:translateY(-1px);
@@ -60,25 +61,36 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow:var(--shadow);
   transform:translateY(-2px);
 }
-.btn.icon{min-width:40px;justify-content:center;padding:9px}
+.btn.icon{min-width:44px;justify-content:center;padding:11px;border-radius:14px;font-size:16px}
 .btn.danger{color:var(--danger);border-color:var(--danger)}
 .btn.danger:hover{background:var(--danger);color:#fff}
 .btn.danger{background:var(--danger);border-color:transparent;color:#fff}
 select.btn{appearance:none}
 
-/* Topbar */
+/* Enhanced Topbar Layout */
 .topbar{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:10px 14px;background:var(--bg-2);border-bottom:1px solid var(--line);position:relative;z-index:10
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:12px 18px;background:var(--bg-2);border-bottom:1px solid var(--line);position:relative;z-index:10;
+  min-height: 64px;
 }
-.group{display:flex;align-items:center;gap:8px}
+.group{display:flex;align-items:center;gap:6px}
 .group.grow{flex:1}
-.brand{display:flex;align-items:center;gap:10px;padding:2px 6px;border-radius:12px}
-.brand-logo{
-  width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
-  display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)
+
+/* Better visual separation between groups */
+.group:not(:last-child):not(.grow) {
+  padding-right: 8px;
+  margin-right: 8px;
+  border-right: 1px solid rgba(var(--muted), 0.2);
 }
-.brand-name{font-weight:800;letter-spacing:.2px}
+
+/* Brand improvements */
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px;border-radius:12px}
+.brand-logo{
+  width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.brand-name{font-weight:800;letter-spacing:.3px;font-size:16px}
 
 /* Layout */
 .canvas{display:grid;grid-template-columns:320px 1fr 0px;height:calc(100vh - 56px - 32px)}
@@ -283,4 +295,214 @@ textarea{min-height:90px;resize:vertical}
 @keyframes slideOutRight{
   from{transform:translateX(0);opacity:1}
   to{transform:translateX(100%);opacity:0}
+}
+
+/* Focus Mode - Hide distractions for concentrated writing */
+body.focus .topbar .group:nth-child(2),
+body.focus .topbar .group:nth-child(3),
+body.focus .topbar .group:nth-child(4),
+body.focus .topbar .group:nth-child(5),
+body.focus .topbar .group:nth-child(8) {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+body.focus .sidebar {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+body.focus .status {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+/* Focus mode button active state */
+body.focus #focusBtn {
+  background: var(--brand);
+  color: white;
+  transform: scale(1.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover to show hidden elements in focus mode */
+body.focus .topbar .group:hover {
+  opacity: 1;
+}
+
+body.focus .sidebar:hover {
+  opacity: 1;
+}
+
+/* Enhanced Button Animations and Micro-interactions */
+.btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0px);
+  transition: all 0.1s ease;
+}
+
+/* Ripple effect for buttons */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  z-index: 0;
+}
+
+.btn:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+.btn * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Smooth sidebar animations */
+.sidebar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.canvas.sidebar-hidden .sidebar {
+  transform: translateX(-100%);
+}
+
+/* Chapter card animations */
+.chapter {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chapter:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Editor animations */
+.editor {
+  transition: all 0.3s ease;
+}
+
+.editor:focus {
+  transform: scale(1.001);
+}
+
+/* Modal animations enhancement */
+.modal {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.show {
+  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal .dialog {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.show .dialog {
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from { 
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  to { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Notification animations enhancement */
+.notification {
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notification:hover {
+  transform: translateX(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bar animation */
+.progress .fill {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Topbar brand animation */
+.brand-logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand:hover .brand-logo {
+  transform: rotate(360deg) scale(1.1);
+}
+
+/* Status bar animations */
+.status {
+  transition: all 0.3s ease;
+}
+
+/* Right panel slide animation */
+.right-panel {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(100%);
+}
+
+.right-panel.active {
+  transform: translateX(0);
+}
+
+/* Theme selector smooth transition */
+#themeSelect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#themeSelect:hover {
+  background: var(--bg-3);
+}
+
+/* Loading state for save button */
+.btn.saving {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn.saving::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
