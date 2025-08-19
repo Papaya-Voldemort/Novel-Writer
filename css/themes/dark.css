@@ -1,0 +1,15 @@
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg: #0d1016;
+  --bg-2: #121622;
+  --bg-3: #1a2130;
+  --ink: #e7ebf3;
+  --muted: #9aa6c1;
+  --line: #273046;
+  --brand: #8ca2ff;
+  --brand-2: #9fb0ff;
+  --danger: #ff6b6b;
+  --success: #51cf66;
+  --warn: #ffd43b;
+  --shadow: 0 14px 36px rgba(0,0,0,.45), 0 5px 14px rgba(0,0,0,.35);
+}

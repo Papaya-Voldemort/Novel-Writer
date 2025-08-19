@@ -4,7 +4,14 @@
   <meta charset="UTF-8">
   <title>NovelCraft — Writing Studio for Authors</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/themes/light.css">
+  <link rel="stylesheet" href="css/themes/dark.css">
+  <link rel="stylesheet" href="css/themes/sepia.css">
+  <link rel="stylesheet" href="css/themes/glass.css">
+  <link rel="stylesheet" href="css/themes/forest.css">
+  <link rel="stylesheet" href="css/themes/ocean.css">
 </head>
 <body data-theme="light">
   <div class="app">
@@ -19,7 +26,6 @@
         <button class="btn icon" id="libraryBtn" title="Library (Ctrl/Cmd+M)" aria-label="Open library">☰</button>
         <button class="btn icon" id="toggleSidebarBtn" title="Toggle chapters (Ctrl/Cmd+\\)" aria-label="Toggle chapters sidebar">📚</button>
         <button class="btn icon" id="plannerBtn" title="Planner (Ctrl/Cmd+P)" aria-label="Open novel planner">🗺</button>
-        <button class="btn icon" id="outlineBtn" title="Outline" aria-label="Show chapter outline">🧭</button>
       </div>
 
       <div class="group">
@@ -45,6 +51,9 @@
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="sepia">Sepia</option>
+          <option value="glass">Glass</option>
+          <option value="forest">Forest</option>
+          <option value="ocean">Ocean</option>
         </select>
         <button class="btn" id="focusBtn" title="Focus mode" aria-label="Toggle focus mode">🎯 Focus</button>
         <button class="btn" id="fullscreenBtn" title="Fullscreen" aria-label="Toggle fullscreen">⛶ Full</button>
@@ -54,6 +63,7 @@
       <div class="group">
         <button class="btn primary" id="charactersBtn">👥 Characters</button>
         <button class="btn" id="notesBtn">📝 Notes</button>
+        <button class="btn" id="outlineBtn" title="Outline" aria-label="Show chapter outline">🧭 Outline</button>
       </div>
     </header>
 
@@ -77,8 +87,16 @@
       <!-- Editor -->
       <main class="editor-wrap">
         <div class="ed-head">
-          <input id="chapterTitleInput" class="ed-title" placeholder="Chapter title">
-          <span class="pill" id="chapterStatsPill">Words: 0 · Characters: 0</span>
+          <div class="ed-title-row">
+            <input id="chapterTitleInput" class="ed-title" placeholder="Chapter title">
+            <div class="chapter-actions">
+              <button class="btn icon" id="chapterGoalBtn" title="Set chapter word goal">🎯</button>
+            </div>
+          </div>
+          <div class="ed-stats">
+            <span class="pill" id="chapterStatsPill">Words: 0 · Characters: 0</span>
+            <span class="pill secondary" id="chapterGoalPill" style="display:none">Goal: 0</span>
+          </div>
         </div>
         <div class="ed-body" id="edBody">
           <div class="page" id="page">
@@ -150,7 +168,14 @@
             <div class="field"><label for="bookGoal">Word goal</label><input type="number" id="bookGoal" min="1000" step="500" value="50000"></div>
             <div class="field full"><label for="bookLogline">Logline / Synopsis</label><textarea id="bookLogline" placeholder="A one or two sentence pitch"></textarea></div>
             <div class="field"><label for="bookTheme">Theme</label>
-              <select id="bookTheme"><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option></select>
+              <select id="bookTheme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="sepia">Sepia</option>
+                <option value="glass">Glass</option>
+                <option value="forest">Forest</option>
+                <option value="ocean">Ocean</option>
+              </select>
             </div>
             <div class="field"><label for="bookCover">Cover color</label><input type="text" id="bookCover" placeholder="#5b7cfa"></div>
           </div>

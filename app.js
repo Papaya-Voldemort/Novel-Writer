@@ -35,6 +35,9 @@
       this.focusMode = false
       this.typewriter = false
       this.sound = new window.TypewriterSound()
+      
+      // Panel tracking
+      this.currentPanel = null
 
       this.mount()
       this.renderAll()
@@ -185,8 +188,9 @@
       $('#typewriterBtn').addEventListener('click', ()=> this.toggleTypewriter())
 
       // Panels
-      $('#charactersBtn').addEventListener('click', ()=> this.openCharacters())
-      $('#notesBtn').addEventListener('click', ()=> this.openNotes())
+      $('#charactersBtn').addEventListener('click', ()=> this.togglePanel('characters'))
+      $('#notesBtn').addEventListener('click', ()=> this.togglePanel('notes'))
+      $('#outlineBtn').addEventListener('click', ()=> this.togglePanel('outline'))
       $('#closeRightPanel').addEventListener('click', ()=> this.closeRightPanel())
       $('#soundToggle').addEventListener('change', (e)=> this.sound.setEnabled(e.target.checked))
 
@@ -198,6 +202,7 @@
       ed.addEventListener('input', (e)=> this.onEditorInput(e))
       ed.addEventListener('keydown', (e)=> this.onEditorKeydown(e))
       $('#chapterTitleInput').addEventListener('input', ()=> this.onTitleInput())
+      $('#chapterGoalBtn').addEventListener('click', ()=> this.setChapterGoal())
 
       // Library modal
       $('#newBookBtn').addEventListener('click', ()=> this.openBookModal())
@@ -325,7 +330,7 @@
       $('#chapterTitleInput').value = ch.title || ''
       $('#editor').innerHTML = ch.content || ''
       this.renderChapters()
-      this.updateChapterStatsDisplay()
+      this.renderChapterStats()
       this.renderStatus()
       if (this.typewriter) setTimeout(()=> this.scrollCaretIntoView(), 30)
     }
@@ -388,7 +393,7 @@
       ch.wordCount = this.countWords(ch.content)
       ch.updatedAt = nowISO()
       this.book.updatedAt = nowISO()
-      this.updateChapterStatsDisplay()
+      this.renderChapterStats()
       this.updateTotals()
       if (this.typewriter) this.scrollCaretIntoView()
     }
@@ -408,6 +413,44 @@
       ch.title = $('#chapterTitleInput').value
       ch.updatedAt = nowISO(); this.book.updatedAt = nowISO()
       this.renderChapters(); this.renderStatus()
+    }
+
+    setChapterGoal(){
+      const ch = this.currentChapter(); if (!ch) return
+      const currentGoal = ch.wordGoal || 0
+      const goal = prompt(`Set word goal for "${ch.title}":`, currentGoal)
+      if (goal === null) return
+      const goalNum = parseInt(goal, 10)
+      if (isNaN(goalNum) || goalNum < 0) {
+        this.showNotification('Please enter a valid number', 'warning')
+        return
+      }
+      ch.wordGoal = goalNum
+      ch.updatedAt = nowISO(); this.book.updatedAt = nowISO()
+      this.save()
+      this.renderChapterStats()
+      this.showNotification(`Chapter goal set to ${goalNum} words`, 'success')
+    }
+
+    renderChapterStats(){
+      const ch = this.currentChapter()
+      if (!ch) return
+      
+      const content = $('#editor').innerHTML
+      const words = this.countWords(content)
+      const chars = this.stripHTML(content).length
+      
+      $('#chapterStatsPill').textContent = `Words: ${words} · Characters: ${chars}`
+      
+      const goalPill = $('#chapterGoalPill')
+      if (ch.wordGoal && ch.wordGoal > 0) {
+        const progress = Math.round((words / ch.wordGoal) * 100)
+        goalPill.textContent = `Goal: ${words}/${ch.wordGoal} (${progress}%)`
+        goalPill.style.display = 'inline-flex'
+        goalPill.style.color = words >= ch.wordGoal ? 'var(--success)' : 'var(--muted)'
+      } else {
+        goalPill.style.display = 'none'
+      }
     }
 
     // Formatting utils
@@ -464,6 +507,35 @@
       if (Math.abs(diff) > 6) container.scrollBy({top: diff, behavior:'smooth'})
     }
 
+    // Panel toggling system
+    togglePanel(panelType) {
+      if (this.currentPanel === panelType) {
+        // Close panel if clicking the same button
+        this.closeRightPanel()
+        this.currentPanel = null
+        this.updatePanelButtons()
+      } else {
+        // Open different panel
+        this.currentPanel = panelType
+        if (panelType === 'characters') this.openCharacters()
+        else if (panelType === 'notes') this.openNotes()
+        else if (panelType === 'outline') this.openOutline()
+        this.updatePanelButtons()
+      }
+    }
+
+    updatePanelButtons() {
+      // Reset all panel buttons
+      $('#charactersBtn').classList.remove('primary')
+      $('#notesBtn').classList.remove('primary')
+      $('#outlineBtn').classList.remove('primary')
+      
+      // Highlight active panel button
+      if (this.currentPanel === 'characters') $('#charactersBtn').classList.add('primary')
+      else if (this.currentPanel === 'notes') $('#notesBtn').classList.add('primary')
+      else if (this.currentPanel === 'outline') $('#outlineBtn').classList.add('primary')
+    }
+
     // Right panel visibility
     openRightPanel(){
       $('#rightPanel').classList.add('active')
@@ -472,6 +544,8 @@
     closeRightPanel(){
       $('#rightPanel').classList.remove('active')
       $('#canvas').classList.remove('with-right')
+      this.currentPanel = null
+      this.updatePanelButtons()
     }
 
     // Characters & Notes Panels
