@@ -87,8 +87,16 @@
       <!-- Editor -->
       <main class="editor-wrap">
         <div class="ed-head">
-          <input id="chapterTitleInput" class="ed-title" placeholder="Chapter title">
-          <span class="pill" id="chapterStatsPill">Words: 0 · Characters: 0</span>
+          <div class="ed-title-row">
+            <input id="chapterTitleInput" class="ed-title" placeholder="Chapter title">
+            <div class="chapter-actions">
+              <button class="btn icon" id="chapterGoalBtn" title="Set chapter word goal">🎯</button>
+            </div>
+          </div>
+          <div class="ed-stats">
+            <span class="pill" id="chapterStatsPill">Words: 0 · Characters: 0</span>
+            <span class="pill secondary" id="chapterGoalPill" style="display:none">Goal: 0</span>
+          </div>
         </div>
         <div class="ed-body" id="edBody">
           <div class="page" id="page">
