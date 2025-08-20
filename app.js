@@ -43,6 +43,21 @@
       this.renderAll()
       this.autosave()
       this.ticker()
+      
+      // Handle PWA shortcuts
+      this.handlePWAShortcuts()
+    }
+
+    // Handle PWA shortcut actions
+    handlePWAShortcuts() {
+      const params = new URLSearchParams(window.location.search)
+      const action = params.get('action')
+      
+      if (action === 'new-book') {
+        setTimeout(() => this.openBookModal(), 500)
+      } else if (action === 'library') {
+        setTimeout(() => this.openLibrary(), 500)
+      }
     }
 
     // Library
@@ -1032,15 +1047,26 @@
 
     // Modal utils
     showModal(sel){ 
-      $(sel).classList.add('show')
-      $(sel).setAttribute('aria-hidden', 'false')
-      // Focus first focusable element
-      const firstFocusable = $(sel).querySelector('input, button, textarea, select')
-      if (firstFocusable) firstFocusable.focus()
+      const modal = $(sel)
+      modal.style.display = 'flex'
+      // Force reflow to ensure the display change is applied
+      modal.offsetHeight
+      modal.classList.add('show')
+      modal.setAttribute('aria-hidden', 'false')
+      // Focus first focusable element after animation
+      setTimeout(() => {
+        const firstFocusable = modal.querySelector('input, button, textarea, select')
+        if (firstFocusable) firstFocusable.focus()
+      }, 150)
     }
     closeModal(sel){ 
-      $(sel).classList.remove('show')
-      $(sel).setAttribute('aria-hidden', 'true')
+      const modal = $(sel)
+      modal.classList.remove('show')
+      modal.setAttribute('aria-hidden', 'true')
+      // Hide after animation completes
+      setTimeout(() => {
+        modal.style.display = 'none'
+      }, 300)
     }
 
     // Notification system
@@ -1076,7 +1102,100 @@
     }
   }
 
+  // PWA functionality
+  class PWAManager {
+    constructor() {
+      this.deferredPrompt = null
+      this.init()
+    }
+
+    init() {
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('SW registered: ', registration)
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError)
+            })
+        })
+      }
+
+      // Listen for the beforeinstallprompt event
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault()
+        // Stash the event so it can be triggered later
+        this.deferredPrompt = e
+        // Show our custom install button
+        this.showInstallButton()
+      })
+
+      // Listen for the app being installed
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed')
+        this.hideInstallButton()
+        // Show a notification
+        if (window.novelcraft) {
+          window.novelcraft.showNotification('NovelCraft installed successfully! 🎉', 'success')
+        }
+      })
+    }
+
+    showInstallButton() {
+      // Check if install button already exists
+      let installBtn = $('#installPWABtn')
+      if (!installBtn) {
+        // Create install button
+        installBtn = document.createElement('button')
+        installBtn.id = 'installPWABtn'
+        installBtn.className = 'btn'
+        installBtn.innerHTML = '📱 Install App'
+        installBtn.title = 'Install NovelCraft as a Progressive Web App'
+        installBtn.addEventListener('click', () => this.installPWA())
+        
+        // Add to topbar
+        const topbarRight = $('.topbar .group:last-child')
+        if (topbarRight) {
+          topbarRight.appendChild(installBtn)
+        }
+      }
+    }
+
+    hideInstallButton() {
+      const installBtn = $('#installPWABtn')
+      if (installBtn) {
+        installBtn.remove()
+      }
+    }
+
+    async installPWA() {
+      if (!this.deferredPrompt) {
+        return
+      }
+
+      // Show the install prompt
+      this.deferredPrompt.prompt()
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await this.deferredPrompt.userChoice
+      
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt')
+      } else {
+        console.log('User dismissed the install prompt')
+      }
+      
+      // Clear the deferredPrompt variable
+      this.deferredPrompt = null
+      this.hideInstallButton()
+    }
+  }
+
   // Instantiate
   const app = new NovelCraft()
+  const pwa = new PWAManager()
   window.novelcraft = app
 })()
